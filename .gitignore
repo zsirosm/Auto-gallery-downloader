@@ -1,5 +1,5 @@
-temp/**
+temp/*
 *.txt
 input_files
-.vscode/**
-__pycache__/**
+.vscode/*
+**/__pycache__/*
