@@ -13,14 +13,10 @@ def loadInitialConfig():
 # define URL builder function for domain, then register it in the dictionary
 def buildUrl(domain):
     def builderTwitter(artistId, artist):
-        return f"https://twitter.com/{artistId}/media"
+        return f"https://twitter.com/{artistId}"
 
     def builderDeviantart(artistId, artist): 
         return f"https://www.deviantart.com/{artistId}"
-
-    #old downloader for simple download from file
-    def builderKemono(artistId, artist):
-        return f"https://kemono.party/{artistId}"
 
     def builderKemonoparty(artistId, artist):
         extraPath = artist.get("extraPath")
@@ -31,7 +27,6 @@ def buildUrl(domain):
     domains = {
         "twitter": builderTwitter,
         "deviantart": builderDeviantart,
-        "kemono": builderKemono,
         "kemonoparty": builderKemonoparty,
     }
     return domains.get(domain, "")
