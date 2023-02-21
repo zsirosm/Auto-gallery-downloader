@@ -26,6 +26,12 @@ class Database():
         self.lock.release()
         return result
 
+    def checkForAccount(self, accountType, accountId):
+        self.lock.acquire()
+        result = self.db.table("accounts").filter({"type": accountType, "accountId": accountId.lower()}).run(self.conn)
+        self.lock.release()   
+        return result
+
     def insertNewAccount(self, accountType, accountId, extraData = {}):
         if (not accountType or not accountId):
             return { "status": "error", "message": "Account type or account id is missing" }
