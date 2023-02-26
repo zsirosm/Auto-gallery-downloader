@@ -1,6 +1,6 @@
 from gallery_dl import config
 
-from downloader.gallery_dl_control import loadInitialConfig, buildUrl, processArtist
+from downloader.downloader import loadInitialConfig, buildUrl, processArtist
 
 
 

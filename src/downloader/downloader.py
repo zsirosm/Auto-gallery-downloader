@@ -1,40 +1,73 @@
 import time
-import logging
-
-from gallery_dl import config, output
+from gallery_dl.job import DownloadJob
+from gallery_dl import config
 
 from downloader.database import database, getCurrentTime
-# updateAccount, getAccountsToUpdate, getAccountsToDownload
 
-from downloader.gallery_dl_control import loadInitialConfig, buildUrl, processArtist
 
-def updateAccounts(accountType, accounts):
+# Initial set config and directory, taken from manual Gallery-dl location
+def loadInitialConfig():
+    config.set((), "base-directory", "Z:\gallery-dl\gallery-dl")
+    configFile = ("F:\Downloads\Gallery-dl\gallery-dl.conf",)
+    config.load(configFile, True)
+
+
+# define URL builder function for every website, then register it in the dictionary
+def buildUrl(website):
+    def builderTwitter(account):
+        artistId = account.get("accountId")
+        return f"https://twitter.com/{artistId}"
+
+    def builderDeviantart(account): 
+        artistId = account.get("accountId")
+        return f"https://www.deviantart.com/{artistId}"
+
+    def builderKemonoparty(account):
+        artistId = account.get("accountId")
+        extraPath = account.get("extraPath")
+        domain = extraPath.get("domain")
+        return f"https://kemono.party/{domain}/user/{artistId}"
+
+    # dictionary
+    domains = {
+        "twitter": builderTwitter,
+        "deviantart": builderDeviantart,
+        "kemonoparty": builderKemonoparty,
+    }
+    return domains.get(website, "")
+
+# processes single account
+def processAccount(account):
+
+    accountName = account.get("accountId")
+    accountType = account.get("type", "")
+
+    print(f"Processing artist {accountType} {accountName}:")
+
+    url = buildUrl(accountType)(account)
+    print("URL:", url)
+    DownloadJob(url).run()
+
+# processes list of accounts, requires list of accounts from the database
+def processAccounts(accountType, accounts):
     updateTime = getCurrentTime()
     accountList = list(accounts)
     accountsToUpdate = len(accountList)
     print(f"Found {accountsToUpdate} accounts to update on {accountType}.")
-    urlFunc = buildUrl(accountType)
 
     for index, account in enumerate(accountList):
-        database.updateAccount(account.get("id"), {"updated": 0})
-        processArtist(urlFunc, account.get("accountId"), account)
-        database.updateAccount(account.get("id"), {"updated": updateTime})
+        accountId = account.get("id")
+        database.updateAccount(accountId, {"updated": 0})
+        processAccount(account)
+        database.updateAccount(accountId, {"updated": updateTime})
         print(f"{index + 1} of {accountsToUpdate} {accountType} account processed, sleeping for 4 seconds.")
         time.sleep(4)
 
 
-class CustomHandler(logging.Handler):
-    def emit(self, logRecord):
-        print("LOG EVENT: ", logRecord)
-
-def registerLogger(name):
-    log = logging.getLogger(name)
-    log.setLevel(logging.DEBUG)
-    handler = CustomHandler()
-    handler.setLevel(logging.DEBUG)
-    log.addHandler(handler)
 
 
+# should be moved to separate file
+# used just for update mode for now, should be expanded
 extractorSettings = {
     "deviantart": {
         "skip": "abort:2"
@@ -44,16 +77,18 @@ extractorSettings = {
     }
 }
 
+# prevent too frequent updates of the same accounts
 timeouts = {
     "deviantart": 36,
     "twitter": 8,
     "kemonoparty": 84,
 }
 
+# main class, supply website and modes
 class Downloader():
-    def __init__(self, name, modes):
-        self.name = name
-        self.extractorSettings = extractorSettings.get(name, {})
+    def __init__(self, domain, modes):
+        self.name = domain
+        self.extractorSettings = extractorSettings.get(domain, {})
         self.modes = modes
     
     def run(self):
@@ -75,6 +110,9 @@ class Downloader():
 
         return modeFunctions.get(mode, default)
 
+    # -------------------modes-----------------------------------------
+
+    # only updates accounts, applies "extractorSettings" to skip downloading everything and only updates accounts older than "timeout"
     def update(self):
         config.clear()
         loadInitialConfig()
@@ -85,15 +123,17 @@ class Downloader():
         hours = timeouts.get(self.name, 12)
         accounts = database.getAccountsToUpdate(self.name, hours * 3600000)
 
+        processAccounts(self.name, accounts)
 
-        updateAccounts(self.name, accounts)
 
+    # download everything
     def download(self):
         config.clear()
         loadInitialConfig()
 
         accounts = database.getAccountsToDownload(self.name)
-        updateAccounts(self.name, accounts)
+
+        processAccounts(self.name, accounts)
 
 
 def launchDownloader(name, modes):
