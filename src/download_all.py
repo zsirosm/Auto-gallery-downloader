@@ -1,16 +1,23 @@
+import os
 from multiprocessing import Process
 
-from downloader.downloader import launchDownloader, registerLogger
+from downloader.downloader import launchDownloader
 
 # ----- EXECUTION PART --------------------------------------
 
 if __name__ == "__main__":
 
+
     print("Launching download...")
 
-    Process(target = launchDownloader, args = ("deviantart",  ["update", "download"])).start()
-    Process(target = launchDownloader, args = ("twitter", ["update", "download"])).start()
-    Process(target = launchDownloader, args = ("kemonoparty", ["update", "download"])).start()
+    os.system("start cmd /k python src/download_site.py twitter")
+    os.system("start cmd /k python src/download_site.py deviantart")
+    os.system("start cmd /k python src/download_site.py kemonoparty")
+
+
+    # Process(target = launchDownloader, args = ("deviantart",  ["update", "download"])).start()
+    # Process(target = launchDownloader, args = ("twitter", ["update", "download"])).start()
+    # Process(target = launchDownloader, args = ("kemonoparty", ["update", "download"])).start()
 
 
 # print("Launching download...")
