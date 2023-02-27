@@ -1,30 +1,23 @@
-from gallery_dl import config
+import sys
 
-from downloader.downloader import loadInitialConfig, buildUrl, processArtist
-
-
-
-# load artists from file
-def processWebsite(domainName, fileName = None):
-    file = open(f"{fileName or domainName}.txt")
-    urlFunc = buildUrl(domainName)
-    with file:
-        for artist in file:
-            artist = artist.strip()
-            processArtist(urlFunc, artist, {})
+from downloader.downloader import launchDownloader
 
 
+knownTypes = ["deviantart", "twitter", "kemonoparty"]
 
-loadInitialConfig()
+if (len(sys.argv) < 2):
+    print("Error: This script requires an argument: accountType")
+    sys.exit()
 
-# processWebsite("twitter")
-# processWebsite("deviantart")
-processWebsite("kemono")
+accountType = sys.argv[1]
 
-# ------- UPDATE MODE -----------------------------
+if (not accountType in knownTypes):
+    print(f"Error: Unknown type {accountType}")
+    sys.exit()
 
-# config.set(("extractor", "twitter"), "skip", "abort:20")
-# processWebsite("twitter", "twitter-generated")
 
-# config.set(("extractor", "deviantart"), "skip", "abort:2")
-# processWebsite("deviantart", "deviantart-old")
+if __name__ == "__main__":
+
+    print("Launching download...")
+
+    launchDownloader(accountType,  ["update", "download"])
