@@ -2,9 +2,9 @@ from rethinkdb import RethinkDB
 import threading
 import time
 import math
+from configparser import ConfigParser
 
 defaultTime = 12*3600*1000
-password = "dfbviksbcilauebiyabv"
 
 def getCurrentTime():
     return math.floor(time.time() * 1000)
@@ -12,9 +12,15 @@ def getCurrentTime():
 class Database():
     def __init__(self):
         self.lock = threading.Lock()
+        self.config = ConfigParser()
+        self.config.read('autogallery.config.ini')
+        host = self.config.get('Default', 'host')
+        port = self.config.get('Default', 'port')
+        user = self.config.get('Default', 'user')
+        password = self.config.get('Default', 'password')
         r = RethinkDB()
         self.r = r
-        self.conn = r.connect(host= "192.168.88.245", port= 11000, user="admin", password= password)
+        self.conn = r.connect(host, port, user, password)
         self.db = r.db("artists")
 
 

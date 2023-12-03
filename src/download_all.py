@@ -11,8 +11,8 @@ if __name__ == "__main__":
     print("Launching download...")
 
     os.system("start cmd /k python src/download_site.py twitter")
-    os.system("start cmd /k python src/download_site.py deviantart")
-    os.system("start cmd /k python src/download_site.py kemonoparty")
+    # os.system("start cmd /k python src/download_site.py deviantart")
+    # os.system("start cmd /k python src/download_site.py kemonoparty") 
 
 
     # Process(target = launchDownloader, args = ("deviantart",  ["update", "download"])).start()

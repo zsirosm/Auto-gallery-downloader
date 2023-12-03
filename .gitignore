@@ -1,5 +1,8 @@
 temp/*
+gallery-dl/**/*
 *.txt
 input_files
+report_files
 .vscode/*
 **/__pycache__/*
+autogallery.config.ini

@@ -8,7 +8,7 @@ from downloader.database import database, getCurrentTime
 # Initial set config and directory, taken from manual Gallery-dl location
 def loadInitialConfig():
     config.set((), "base-directory", "Z:\gallery-dl\gallery-dl")
-    configFile = ("F:\Downloads\Gallery-dl\gallery-dl.conf",)
+    configFile = ("gallery-dl\gallery-dl.conf",)
     config.load(configFile, True)
 
 
@@ -60,8 +60,8 @@ def processAccounts(accountType, accounts):
         database.updateAccount(accountId, {"updated": 0})
         processAccount(account)
         database.updateAccount(accountId, {"updated": updateTime})
-        print(f"{index + 1} of {accountsToUpdate} {accountType} account processed, sleeping for 4 seconds.")
-        time.sleep(4)
+        print(f"{index + 1} of {accountsToUpdate} {accountType} account processed, sleeping for 3 seconds.")
+        time.sleep(3)
 
 
 
@@ -80,8 +80,8 @@ extractorSettings = {
 # prevent too frequent updates of the same accounts
 timeouts = {
     "deviantart": 36,
-    "twitter": 8,
-    "kemonoparty": 84,
+    "twitter": 36,
+    "kemonoparty": 168,
 }
 
 # main class, supply website and modes
